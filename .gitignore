@@ -1,0 +1,9 @@
+env/
+*__pycache__*
+.vscode/
+.env
+1_min
+2_scalar_v
+3_integral
+4_maxmin_aij
+5_maxmin_for_special_type
