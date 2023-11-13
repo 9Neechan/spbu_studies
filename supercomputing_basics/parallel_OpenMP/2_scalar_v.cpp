@@ -19,6 +19,7 @@ int parallel(vector<int> v1, vector<int> v2, int num_thr) {
     for (int i = 0; i < v1.size(); i++) { 
         out += v1[i]*v2[i];
     } 
+
     return out;  
 } 
 

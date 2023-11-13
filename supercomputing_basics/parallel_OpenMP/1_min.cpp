@@ -18,10 +18,10 @@ int serial(vector<int> v) {
 int parallel(vector<int> v, int num_thr) { 
     int min = INT_MAX; 
 
-#pragma omp parallel for reduction(min:min) num_threads(num_thr)
-    for (int i = 0; i < v.size(); ++i) { 
-        if (v[i] < min) min = v[i];
-    } 
+    #pragma omp parallel for reduction(min:min) num_threads(num_thr)
+        for (int i = 0; i < v.size(); ++i) { 
+            if (v[i] < min) min = v[i];
+        } 
     //printf("Running on multiple threads%d\n", omp_get_thread_num());
     return min; 
 } 

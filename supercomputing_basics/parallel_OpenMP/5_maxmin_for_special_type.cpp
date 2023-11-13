@@ -3,18 +3,18 @@
 
 using namespace std;
 
-int min_in_v(vector<int> v, int num_thr, int l_ind, int r_ind) { 
+int min_in_v(vector<int> v, int l_ind, int r_ind) { 
     int min = INT_MAX; 
-#pragma omp parallel for reduction(min:min) num_threads(num_thr)
+    #pragma omp for reduction(min:min) 
     for (int i = l_ind; i < r_ind; ++i) { 
         if (v[i] < min) min = v[i];
     } 
     return min; 
 } 
 
-int max_in_v(vector<int> v, int num_thr) { 
+int max_in_v(vector<int> v) { 
     int max = INT_MIN; 
-#pragma omp parallel for reduction(max:max) num_threads(num_thr)
+    #pragma omp for reduction(max:max)
     for (int i = 0; i < v.size(); ++i) { 
         if (v[i] > max) max = v[i];
     } 
@@ -26,27 +26,46 @@ int parallel(vector<vector<int>> v, int num_thr, int N, string type, int l) {
     int counter_r = l;
     int counter_l = 0;
     int counter = 0;
+    int ans = 0;
 
-    #pragma omp parallel for num_threads(num_thr) shared(counter_r, counter_l, counter)
+    #pragma omp parallel num_threads(num_thr) shared(counter_r, counter_l, counter)
+    {
+        #pragma omp for ordered 
         for (int i = 0; i < N; i++) {
-            if (type == "treyg")
-                v_min[i] = min_in_v(v[i], num_thr, i, N);
+            #pragma omp ordered // тк важна величина сдвига
+            {
+                if (type == "treyg") {
+                    v_min[i] = min_in_v(v[i], i, N);
+                    /*    
+                    #pragma omp for reduction(min:min) 
+                    for (int j = i; j < N; ++j) { 
+                        if (v[i][j] < min) min = v[i][j];
+                    } 
+                    v_min[i] = min;*/
+                }
 
-            if (type == "lent") {
-                if (counter >= l) 
-                    counter_l++;
-                if (counter_r < N)
-                    counter_r++;
-                
-                v_min[i] = min_in_v(v[i], num_thr, counter_l, counter_r);
-                counter++;
-            }
-                
+                if (type == "lent") {
+                    if (counter >= l) 
+                        counter_l++;
+                    if (counter_r < N)
+                        counter_r++;
+                    
+                    v_min[i] = min_in_v(v[i], counter_l, counter_r);
+                    /*    
+                    #pragma omp for reduction(min:min) 
+                    for (int j = counter_l; j < counter_r; ++j) { 
+                        if (v[i][j] < min) min = v[i][j];
+                    } 
+                    //v_min[i] = min;*/
 
+                    counter++;
+                }
+            }  
         }
-        #pragma omp barrier
-    
-    int ans = max_in_v(v_min, num_thr);
+        
+        #pragma omp barrier 
+        ans = max_in_v(v_min);
+    }
     return ans;
 } 
 

@@ -3,18 +3,18 @@
 
 using namespace std;
 
-int min_in_v(vector<int> v, int num_thr) { 
+int min_in_v(vector<int> v) { 
     int min = INT_MAX; 
-#pragma omp parallel for reduction(min:min) num_threads(num_thr)
+#pragma omp for reduction(min:min) //num_threads(num_thr)
     for (int i = 0; i < v.size(); ++i) { 
         if (v[i] < min) min = v[i];
     } 
     return min; 
 } 
 
-int max_in_v(vector<int> v, int num_thr) { 
+int max_in_v(vector<int> v) { 
     int max = INT_MIN; 
-#pragma omp parallel for reduction(max:max) num_threads(num_thr)
+#pragma omp for reduction(max:max) //num_threads(num_thr)
     for (int i = 0; i < v.size(); ++i) { 
         if (v[i] > max) max = v[i];
     } 
@@ -23,15 +23,18 @@ int max_in_v(vector<int> v, int num_thr) {
 
 int parallel(vector<vector<int>> v, int num_thr, int N) { 
     vector<int> v_min(N);
+    int ans;
 
     #pragma omp parallel for num_threads(num_thr)
-    
+    {
         for (int i = 0; i < N; i++) {
-            v_min[i] = min_in_v(v[i], num_thr);
+            v_min[i] = min_in_v(v[i]);
         }
         #pragma omp barrier
     
-    int ans = max_in_v(v_min, num_thr);
+        //#pragma omp atomic
+        ans = max_in_v(v_min);
+    }
     return ans;
 } 
 
