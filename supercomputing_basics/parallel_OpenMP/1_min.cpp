@@ -1,4 +1,6 @@
 // Минимум в векторе
+// как сделать без педукции
+// рассчитать ускорение и построить графики
 
 #include <chrono> 
 #include <bits/stdc++.h>
@@ -26,6 +28,31 @@ int parallel(vector<int> v, int num_thr) {
     return min; 
 } 
 
+int parallel2(vector<int> v, int num_thr) {
+    int index = 0;
+    int min = v[0];
+    #pragma omp parallel
+    {
+        int index_local = index;
+        float min_local = min;  
+        #pragma omp for nowait
+        for (int i = 1; i < v.size(); i++) {        
+            if (v[i] < min_local) {
+                min_local = v[i];
+                index_local = i;
+            }
+        }
+        #pragma omp critical 
+        {
+            if (min_local < min) {
+                min = min_local;
+                index = index_local;
+            }
+        }
+    }
+    return min;
+}
+
 int main() { 
     ofstream myfile;
     myfile.open ("./tables/table1.csv");
@@ -34,7 +61,7 @@ int main() {
     vector<string> s(10);
 
     for (int k = 1; k <= 8; k++) { // num threads
-        int N = 1000;
+        int N = 10000000;
 
         cout << "Кол-во потоков: " << k << endl;
 
@@ -45,7 +72,7 @@ int main() {
                 v[i] = rand() % 101 - 100;
             
             auto start_time = chrono::high_resolution_clock::now(); 
-            int result_parallel = parallel(v, k); 
+            int result_parallel = parallel2(v, k); 
             auto end_time = chrono::high_resolution_clock::now(); 
             chrono::duration<double> parallel_duration = end_time - start_time; 
 
