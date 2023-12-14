@@ -1,0 +1,12 @@
+stages:
+  '1':
+    cmd: ipython src/1.ipynb
+    outs:
+    - output/1.txt
+
+  '2':
+    cmd: ipython src/2.ipynb
+    deps:
+    - 1.ipynb
+    outs:
+    - output/2.txt
