@@ -1,4 +1,5 @@
 // Вычисление определенного интеграла методом квадратов
+
 #include <bits/stdc++.h>
 #include<iostream>
 #include<cmath>
@@ -38,16 +39,16 @@ float parallel(int a, int b, int n, int num_thr) {
 }
 
 int main() { 
+    string head = "кол-во потоков,10000,20000,30000,40000,50000,60000,70000,80000,90000,100000,\n";
+
     ofstream myfile;
     myfile.open ("./tables/table3.csv");
-    myfile << "1_thr,2_thr,3_thr,4_thr,5_thr,6_thr,7_thr,8_thr,\n";
-
-    vector<string> s(10);
+    myfile << head;
 
     for (int k = 1; k <= 8; k++) {
-        int N = 10;
+        int N = 10000;
 
-        cout << "Кол-во потоков: " << k << endl;
+        myfile << k << ",";
 
         for (int j = 0; j < 10; j++) {
             
@@ -55,25 +56,13 @@ int main() {
             int result_parallel = parallel(1, 5, N, k); 
             auto end_time = chrono::high_resolution_clock::now(); 
             chrono::duration<double> parallel_duration = end_time - start_time; 
-            //int result_serial = serial(1, 5, N);
 
-            cout << "N = " << N; // << ". Min = " << result_parallel << endl; 
-            cout << " Duration: " << parallel_duration.count() << " seconds" << endl; 
-            //std::cout << "Serial result: " << result_serial << std::endl; 
-            //std::cout << "Parallel result: " << result_parallel << std::endl; 
-            cout << endl; 
+            string ap = to_string(parallel_duration.count()*pow(10, 6));
+            myfile << ap << ",";
 
-            string ap = to_string(parallel_duration.count()) + ",";
-            s[j].append(ap);
-
-            N = N + 1000;
+            N = N + 10000;
         }
-        cout << endl << endl;
-    }
-
-    for (int l = 0; l < 10; l++) {
-        s[l].append("\n");
-        myfile << s[l];
+        myfile << "\n";
     }
     myfile.close();
   

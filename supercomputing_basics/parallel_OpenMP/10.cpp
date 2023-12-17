@@ -1,60 +1,36 @@
 // Поиск максимального значения среди минимальных элементов строк матрицы
+// c использованием распараллеливания разного уровня вложенности
 
-//#include <chrono> 
 #include <bits/stdc++.h>
 
 using namespace std;
 
-int min_in_v(vector<int> v) { 
-    int min = INT_MAX; 
-#pragma omp parallel for reduction(min:min) //num_threads(num_thr)
-    for (int i = 0; i < v.size(); ++i) { 
-        if (v[i] < min) min = v[i];
-    } 
-    return min; 
-} 
 
-int max_in_v(vector<int> v) { 
-    int max = INT_MIN; 
-#pragma omp parallel for reduction(max:max) //num_threads(num_thr)
-    for (int i = 0; i < v.size(); ++i) { 
-        if (v[i] > max) max = v[i];
-    } 
-    return max; 
-} 
-
-int parallel(vector<vector<int>> v, int num_thr, int N) { 
-    vector<int> v_min(N);
-    int ans;
-
-    #pragma omp parallel num_threads(num_thr)
-    {
-        #pragma omp for
-        for (int i = 0; i < N; i++) {
-            v_min[i] = min_in_v(v[i]);
-        }
-        #pragma omp barrier
-        ans = max_in_v(v_min);
-    }
-    return ans;
-} 
-
-int parallel4(vector<vector<int>> v, int num_thr, int N) { 
+int parallel1(vector<vector<int>> v, int num_thr, int N) { 
     int min_max = 0;
 
-#pragma omp parallel for shared(v) reduction(max:min_max) num_threads(num_thr) // schedule(guided, 100)
+#pragma omp parallel for shared(v) reduction(max:min_max) num_threads(num_thr) 
     for (int i = 0; i < N; ++i) {
         int my_min = INT_MAX;
         for (int j = 0; j < N; ++j) {
-            if (v[i][j] < my_min){
-                my_min = v[i][j];
-            }
+            if (v[i][j] < my_min) my_min = v[i][j];
         }
-        if (min_max < my_min){
-            min_max = my_min;
-        }
+        if (min_max < my_min) min_max = my_min;
     }
+    return min_max;
+}
 
+int parallel2(vector<vector<int>> v, int num_thr, int N) { 
+    int min_max = 0;
+    int my_min = INT_MAX;
+
+    for (int i = 0; i < N; ++i) {
+        #pragma omp parallel for shared(v) reduction(max:min_max) num_threads(num_thr) 
+        for (int j = 0; j < N; ++j) {
+            if (v[i][j] < my_min) my_min = v[i][j];
+        }
+        if (min_max < my_min) min_max = my_min;
+    }
     return min_max;
 }
 
@@ -62,7 +38,7 @@ int main() {
     string head = "кол-во потоков,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,\n";
 
     ofstream myfile;
-    myfile.open ("./tables/table4.csv");
+    myfile.open ("./tables/table_real10_2.csv");
     myfile << head;
 
     for (int k = 1; k <= 8; k++) {
@@ -81,7 +57,7 @@ int main() {
             }
             
             auto start_time = chrono::high_resolution_clock::now(); 
-            int result_parallel = parallel4(v, k, N); 
+            int result_parallel = parallel2(v, k, N); 
             auto end_time = chrono::high_resolution_clock::now(); 
             chrono::duration<double> parallel_duration = end_time - start_time; 
 
