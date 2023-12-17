@@ -1,9 +1,7 @@
 // Поиск минимума в векторе
 
-#include <chrono> 
 #include <bits/stdc++.h>
 #include <omp.h>
-#include <vector>
 
 using namespace std;
   
@@ -14,7 +12,10 @@ int serial(vector<int> v) {
     } 
     return min; 
 } 
-  
+
+// reduction - Для каждой переменной создаются локальные копии в каждом потоке.
+// Над локальными копиями переменных после выполнения всех операторов параллельной области выполняется заданный оператор. 
+
 int parallel(vector<int> v, int num_thr) { 
     int min = INT_MAX; 
 
@@ -34,7 +35,7 @@ int parallel2(vector<int> v, int num_thr) {
         for (int i = 0; i < v.size(); i++) {        
             if (v[i] < min_local) min_local = v[i];
         }
-        #pragma omp critical 
+        #pragma omp critical // ждать пока все потоки завершат свои операции до этого момента
         {
             if (min_local < min) min = min_local;
         }
@@ -93,32 +94,3 @@ int main() {
 
     return 0; 
 }
-    
-
-	/*
-    auto start_time = std::chrono::high_resolution_clock::now(); 
-  
-	// !!!
-    int result_serial = serial(v); 
-  
-    auto end_time = std::chrono::high_resolution_clock::now(); 
-  
-    std::chrono::duration<double> serial_duration = end_time - start_time; 
-
-    start_time = std::chrono::high_resolution_clock::now(); 
-  
-  	// !!!
-    int result_parallel = parallel(v); 
-    
-	end_time = std::chrono::high_resolution_clock::now(); 
-    std::chrono::duration<double> parallel_duration = end_time - start_time; 
-  
-    std::cout << "Serial result: " << result_serial << std::endl; 
-    std::cout << "Parallel result: " << result_parallel << std::endl; 
-    std::cout << "Serial duration: " << serial_duration.count() << " seconds" << std::endl; 
-    std::cout << "Parallel duration: " << parallel_duration.count() << " seconds" << std::endl; 
-    std::cout << "Speedup: " << serial_duration.count() << parallel_duration.count()  << std::endl; 
-    */
-  
-
-

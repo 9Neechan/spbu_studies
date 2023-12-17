@@ -1,8 +1,8 @@
 // Поиск максимального значения среди минимальных элементов строк матрицы
 // c использованием и без использования вложенного параллелизма 
 
-//#include <chrono> 
 #include <bits/stdc++.h>
+#include <omp.h>
 
 using namespace std;
 
@@ -75,7 +75,7 @@ int parallel1(vector<vector<int>> v, int num_thr, int N) {
     return ans;
 }
 
-
+// два разных паралльлельных области
 int parallel2(vector<vector<int>> v, int num_thr, int N) { 
     vector<int> v_min(N);
     int ans;

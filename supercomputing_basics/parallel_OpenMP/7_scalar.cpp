@@ -1,7 +1,7 @@
+// Скаляроное произведение для последовательного набора векторов
+// с использованием sections
+
 #include <omp.h>
-#include <iostream>
-#include <random>
-#include <fstream>
 #include <bits/stdc++.h>
 
 using namespace std;
@@ -28,14 +28,15 @@ int parallel7(int num_thr, int N) {
     myfile2.seekg(0, myfile2.end);
     int length = myfile2.tellg();
     myfile2.seekg(0, myfile2.beg);
-
-    //vector <Vect *> vect_arr(0);    
+   
     vector <vector<int>> v_arr(0);    
     
     int ans = 0;
-    uint16_t index = 0;
+    int index = 0;
     #pragma omp parallel shared(v_arr, index) num_threads(num_thr)
     {
+        // sections - секции выполняются разными потоками параллельно
+        // завершение директивы по умолчанию синхронизируется
         #pragma omp sections nowait
         {
             #pragma omp section
@@ -43,31 +44,24 @@ int parallel7(int num_thr, int N) {
                     vector<int> v(N);
                     v = read(myfile2, N, v);
                     v_arr.push_back(v);
-                    //v_arr.back() -> Read(myfile2, N, v);
-                    //cout << "readok" << endl;
-                    if (i%2 == 1) index+=2;
-                    #pragma omp flush(index)
+
+                    if (i % 2 == 1) index += 2; // уведомляем, когда записаны 2 вектора
+                    #pragma omp flush(index) // точка синхронизации переменных между потоками в памяти
                 }
 
             #pragma omp section
-                for (int i = 0; i <10; i += 2){
-                    while (index < i + 2) {
-                       #pragma omp flush(index)
-                        //cout << index << endl;
+                for (int i = 0; i < 10; i += 2){
+                    while (index < i + 2) { 
+                       #pragma omp flush(index) // умножаем, когда пришло уведомление
                     }
-                    //cout << (*(vect_arr[i])) * (*(vect_arr[i+1])) << endl;
                     ans = multiply_v(v_arr[i], v_arr[i+1]);
-                }
-                    
-        } // end of sections
-    } // end of parallel section
+                }        
+        } 
+    } 
     return ans;
 }
 
 int main(){
-    // https://www.openmp.org/wp-content/uploads/openmp-examples-4.0.2.pdf
-    // стр. 13
-
     string head = "кол-во потоков,100,200,300,400,500,600,700,800,900,1000,\n";
     
     ofstream myfile;

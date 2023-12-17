@@ -2,8 +2,8 @@
 // исследование режимов распараллеливания цикла for  (static, dynamic, guided): 
 // при использовании цикла с неравномерной нагрузкой итераций
 
-//#include <chrono> 
 #include <bits/stdc++.h>
+#include <omp.h>
 
 using namespace std;
   

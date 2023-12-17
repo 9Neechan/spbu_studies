@@ -1,8 +1,7 @@
 // Вычисление определенного интеграла методом квадратов
 
 #include <bits/stdc++.h>
-#include<iostream>
-#include<cmath>
+#include <omp.h>
 
 using namespace std;
 
@@ -29,7 +28,7 @@ float parallel(int a, int b, int n, int num_thr) {
     h = (b - a) * 1.0 / n;
     S = 0;
 
-#pragma omp parallel for reduction(+:S) num_threads(num_thr) // не надо # pragma omp ordered
+#pragma omp parallel for reduction(+:S) num_threads(num_thr) 
     for(int i = 0; i < n-1; i++) {
         x = a + i * h;
         S = S + f(x);

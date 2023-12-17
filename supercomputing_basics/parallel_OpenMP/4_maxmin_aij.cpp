@@ -1,7 +1,7 @@
 // Поиск максимального значения среди минимальных элементов строк матрицы
 
-//#include <chrono> 
 #include <bits/stdc++.h>
+#include <omp.h>
 
 using namespace std;
 
@@ -42,7 +42,7 @@ int parallel(vector<vector<int>> v, int num_thr, int N) {
 int parallel4(vector<vector<int>> v, int num_thr, int N) { 
     int min_max = 0;
 
-#pragma omp parallel for shared(v) reduction(max:min_max) num_threads(num_thr) // schedule(guided, 100)
+#pragma omp parallel for shared(v) reduction(max:min_max) num_threads(num_thr)
     for (int i = 0; i < N; ++i) {
         int my_min = INT_MAX;
         for (int j = 0; j < N; ++j) {

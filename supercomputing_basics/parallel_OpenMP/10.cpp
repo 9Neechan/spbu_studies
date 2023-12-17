@@ -2,6 +2,7 @@
 // c использованием распараллеливания разного уровня вложенности
 
 #include <bits/stdc++.h>
+#include <omp.h>
 
 using namespace std;
 
@@ -17,15 +18,16 @@ int parallel1(vector<vector<int>> v, int num_thr, int N) {
         }
         if (min_max < my_min) min_max = my_min;
     }
-    return min_max;
+    return min_max; 
 }
 
 int parallel2(vector<vector<int>> v, int num_thr, int N) { 
     int min_max = 0;
-    int my_min = INT_MAX;
-
+    
     for (int i = 0; i < N; ++i) {
-        #pragma omp parallel for shared(v) reduction(max:min_max) num_threads(num_thr) 
+        int my_min = INT_MAX;
+        
+        #pragma omp parallel for shared(v, i, my_min) reduction(max:min_max) num_threads(num_thr) 
         for (int j = 0; j < N; ++j) {
             if (v[i][j] < my_min) my_min = v[i][j];
         }

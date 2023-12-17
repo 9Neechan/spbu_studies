@@ -1,8 +1,7 @@
 //Скалярное произведение векторов
 
-//#include <chrono> 
 #include <bits/stdc++.h>
-#include "1_min.cpp"
+#include <omp.h>
 
 using namespace std;
   
@@ -60,48 +59,3 @@ int main() {
   
     return 0; 
 }
-
-
-/*
-#include <omp.h>
-#include <vector>
- 
-using namespace std;
- 
-int main()
-{
-	vector<int> v = {1, 2, 3, 5, 645, 44, 7, 5, 454, 96, 78, 32, 23, 0, -2, -4, -6, -85, -9};
-	
-	#pragma omp parallel //num_threads(4)
-	{
-
-	}
-}
-*/
-
-
-
-/*
-#include <omp.h>
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-
-
-using namespace std;
-
-int main(int argc, char* argv[])
-{
-	printf("Starting Program!\n");
-
-	#pragma omp parallel //num_threads(4)
-	{
-		printf("Running on multiple threads%d\n", omp_get_thread_num());
-	}
-
-	printf("Finished!\n");
-
-	cin.get();
-	return 0;
-}
-*/
