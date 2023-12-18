@@ -44,7 +44,7 @@ int parallel2(vector<int> v, int num_thr) {
 }
 
 int main() { 
-    string head = "кол-во потоков,1000000,2000000,3000000,4000000,5000000,6000000,7000000,8000000,9000000,10000000,\n";
+    string head = "кол-во потоков,10000000,20000000,30000000,40000000,50000000,60000000,70000000,80000000,90000000,100000000,\n";
     
     ofstream myfile;
     myfile.open ("./tables/table1_reduction.csv");
@@ -54,12 +54,13 @@ int main() {
     myfile2.open ("./tables/table1_noreduction.csv");
     myfile2 << head;
 
-    for (int k = 1; k <= 8; k++) { // num threads
-        int N = 1000000;
+    for (int k = 1; k <= 16; k++) { // num threads
+        int N = 10000000;
 
         myfile << k << ",";
         myfile2 << k << ",";
-
+        cout << k << endl;
+        
         for (int j = 0; j < 10; j++) {
             vector<int> v(N);
     
@@ -84,7 +85,7 @@ int main() {
             ap = to_string(parallel_duration.count()*pow(10, 6));
             myfile2 << ap << ",";
 
-            N = N + 1000000; // len vec
+            N = N + 10000000; // len vec
         }
         myfile << "\n";
         myfile2 << "\n";

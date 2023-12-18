@@ -38,16 +38,17 @@ float parallel(int a, int b, int n, int num_thr) {
 }
 
 int main() { 
-    string head = "кол-во потоков,10000,20000,30000,40000,50000,60000,70000,80000,90000,100000,\n";
+    string head = "кол-во потоков,10000000,20000000,30000000,40000000,50000000,60000000,70000000,80000000,90000000,100000000,\n";
 
     ofstream myfile;
     myfile.open ("./tables/table3.csv");
     myfile << head;
 
-    for (int k = 1; k <= 8; k++) {
-        int N = 10000;
+    for (int k = 1; k <= 12; k++) {
+        int N = 10000000;
 
         myfile << k << ",";
+        cout << k << endl;
 
         for (int j = 0; j < 10; j++) {
             
@@ -59,7 +60,7 @@ int main() {
             string ap = to_string(parallel_duration.count()*pow(10, 6));
             myfile << ap << ",";
 
-            N = N + 10000;
+            N = N + 10000000;
         }
         myfile << "\n";
     }

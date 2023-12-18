@@ -1,6 +1,8 @@
 // Поиск максимального значения среди минимальных элементов строк матрицы
 // c использованием и без использования вложенного параллелизма 
 
+// https://learn.microsoft.com/ru-ru/cpp/parallel/openmp/a-examples?view=msvc-170 
+
 #include <bits/stdc++.h>
 #include <omp.h>
 
@@ -42,7 +44,7 @@ int max_in_v_serial(vector<int> v) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int parallel(vector<vector<int>> v, int num_thr, int N) { 
+int parallel0(vector<vector<int>> v, int num_thr, int N) { 
     int min_max = 0;
 
 #pragma omp parallel for shared(v) reduction(max:min_max) num_threads(num_thr) // schedule(guided, 100)
@@ -129,14 +131,14 @@ int parallel4(vector<vector<int>> v, int num_thr, int N) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int main() { 
-    string head = "кол-во потоков,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,\n";
+    string head = "кол-во потоков,5000,6000,7000,8000,9000,10000,11000,12000,13000,14000,\n";
 
     ofstream myfile;
-    myfile.open ("./tables/table10_4.csv");
+    myfile.open ("./tables/table9_4.csv");
     myfile << head;
 
     for (int k = 1; k <= 8; k++) {
-        int N = 1000;
+        int N = 5000;
 
         myfile << k << ",";
         cout << k << endl;

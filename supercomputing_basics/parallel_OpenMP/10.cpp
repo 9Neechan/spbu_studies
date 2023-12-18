@@ -40,7 +40,7 @@ int main() {
     string head = "кол-во потоков,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,\n";
 
     ofstream myfile;
-    myfile.open ("./tables/table_real10_2.csv");
+    myfile.open ("./tables/table_real10_1.csv");
     myfile << head;
 
     for (int k = 1; k <= 8; k++) {
@@ -59,7 +59,7 @@ int main() {
             }
             
             auto start_time = chrono::high_resolution_clock::now(); 
-            int result_parallel = parallel2(v, k, N); 
+            int result_parallel = parallel1(v, k, N); 
             auto end_time = chrono::high_resolution_clock::now(); 
             chrono::duration<double> parallel_duration = end_time - start_time; 
 

@@ -67,7 +67,7 @@ int main() {
     myfile.open ("./tables/table11.csv");
     myfile << head;
 
-    int N = 1000;
+    int N = 20000;
     vector<int> v1(N);
     vector<int> v2(N);
 
@@ -76,8 +76,9 @@ int main() {
         v2[i] = rand() % 101 - 100;
     }
 
-    for (int k = 1; k <= 8; k++) {
+    for (int k = 1; k <= 12; k++) {
         myfile << k << ",";
+        cout << k << endl;
 
         for (int j = 0; j < 3; j++) {
             for (int m = 0; m < 4; m++) {

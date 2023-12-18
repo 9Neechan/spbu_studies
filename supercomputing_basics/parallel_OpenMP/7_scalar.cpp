@@ -6,7 +6,7 @@
 
 using namespace std;
 
-int multiply_v(vector<int> v1, vector<int> v2) { 
+int multiply_v_serial(vector<int> v1, vector<int> v2) { 
     int out = 0;
     for (int i = 0; i < v1.size(); i++) { 
         out+=v1[i]*v2[i];
@@ -14,17 +14,27 @@ int multiply_v(vector<int> v1, vector<int> v2) {
     return out; 
 } 
 
+int multi_parallel(vector<int> v1, vector<int> v2) { 
+    int out = 0;
+#pragma omp parallel for reduction(+:out) //num_threads(num_thr)
+    for (int i = 0; i < v1.size(); i++) { 
+        out += v1[i]*v2[i];
+    } 
+    return out;  
+} 
+
 vector<int> read(ifstream &file, int N, vector<int> v){
-        for (int i=0; i<N; i++) {
-            string s;
-            getline(file, s);
-            v[i] = atoi(s.c_str());
-        }
-        return v;
+    for (int i=0; i<N; i++) {
+        string s;
+        getline(file, s);
+        v[i] = atoi(s.c_str());
     }
+    return v;
+}
+
 
 int parallel7(int num_thr, int N) {
-    ifstream myfile2("example.txt", std::ifstream::binary);
+    ifstream myfile2("data.txt", std::ifstream::binary);
     myfile2.seekg(0, myfile2.end);
     int length = myfile2.tellg();
     myfile2.seekg(0, myfile2.beg);
@@ -54,7 +64,8 @@ int parallel7(int num_thr, int N) {
                     while (index < i + 2) { 
                        #pragma omp flush(index) // умножаем, когда пришло уведомление
                     }
-                    ans = multiply_v(v_arr[i], v_arr[i+1]);
+                    //ans = multiply_v_serial(v_arr[i], v_arr[i+1]);
+                    ans = multi_parallel(v_arr[i], v_arr[i+1]);
                 }        
         } 
     } 
@@ -62,14 +73,15 @@ int parallel7(int num_thr, int N) {
 }
 
 int main(){
-    string head = "кол-во потоков,100,200,300,400,500,600,700,800,900,1000,\n";
+    string head = "кол-во потоков,100000,200000,300000,400000,500000,600000,700000,800000,900000,1000000,\n";
     
     ofstream myfile;
-    myfile.open ("./tables/table7.csv");
+    //myfile.open ("./tables/table7_serial.csv");
+    myfile.open ("./tables/table7_parallel.csv");
     myfile << head;
 
-    for (int k = 1; k <= 8; k++) {
-        int N = 100;
+    for (int k = 1; k <= 12; k++) {
+        int N = 100000;
 
         myfile << k << ",";
 
@@ -82,7 +94,7 @@ int main(){
             string ap = to_string(parallel_duration.count()*pow(10, 8));
             myfile << ap << ",";
 
-            N = N + 100;
+            N = N + 100000;
         }
         myfile << "\n";
     }

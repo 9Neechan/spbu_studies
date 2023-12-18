@@ -5,40 +5,6 @@
 
 using namespace std;
 
-int min_in_v(vector<int> v) { 
-    int min = INT_MAX; 
-#pragma omp parallel for reduction(min:min) //num_threads(num_thr)
-    for (int i = 0; i < v.size(); ++i) { 
-        if (v[i] < min) min = v[i];
-    } 
-    return min; 
-} 
-
-int max_in_v(vector<int> v) { 
-    int max = INT_MIN; 
-#pragma omp parallel for reduction(max:max) //num_threads(num_thr)
-    for (int i = 0; i < v.size(); ++i) { 
-        if (v[i] > max) max = v[i];
-    } 
-    return max; 
-} 
-
-int parallel(vector<vector<int>> v, int num_thr, int N) { 
-    vector<int> v_min(N);
-    int ans;
-
-    #pragma omp parallel num_threads(num_thr)
-    {
-        #pragma omp for
-        for (int i = 0; i < N; i++) {
-            v_min[i] = min_in_v(v[i]);
-        }
-        #pragma omp barrier
-        ans = max_in_v(v_min);
-    }
-    return ans;
-} 
-
 int parallel4(vector<vector<int>> v, int num_thr, int N) { 
     int min_max = 0;
 
@@ -58,7 +24,22 @@ int parallel4(vector<vector<int>> v, int num_thr, int N) {
     return min_max;
 }
 
+vector<int> read(ifstream &file, int N, vector<int> v){
+    for (int i=0; i<N; i++) {
+        string s;
+        getline(file, s);
+        v[i] = atoi(s.c_str());
+    }
+    return v;
+}
+
 int main() { 
+    /*
+    ifstream myfile2("./tables/data.txt", std::ifstream::binary);
+    myfile2.seekg(0, myfile2.end);
+    int length = myfile2.tellg();
+    myfile2.seekg(0, myfile2.beg);*/
+
     string head = "кол-во потоков,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,\n";
 
     ofstream myfile;
@@ -72,13 +53,23 @@ int main() {
         cout << k << endl;
 
         for (int j = 0; j < 10; j++) {
-            vector<vector<int> > v(N, vector<int>(N));
-    
+            vector<vector<int>> v(N, vector<int>(N));
+
             for (int i = 0; i < N; i++) {
                 for (int m = 0; m < N; m++) {
                     v[i][m] = rand() % 101 - 100;
                 }
             }
+            /*
+            vector <vector<int>> v_arr(0);   
+    
+            for (int i = 0; i < N; i++) {
+                vector<int> v(N);
+                v = read(myfile2, N, v);
+                v_arr.push_back(v);
+            }
+            cout << "=" << endl;
+            */
             
             auto start_time = chrono::high_resolution_clock::now(); 
             int result_parallel = parallel4(v, k, N); 
