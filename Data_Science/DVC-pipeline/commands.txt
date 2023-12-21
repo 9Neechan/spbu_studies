@@ -1,0 +1,33 @@
+dvc repro
+
+dvc run
+
+dvc dag
+
+
+stages:
+  LINEAR:
+    cmd: ipython src/LINEAR.ipynb model_linear.pkl
+    deps:
+    - src/LINEAR.ipynb
+    outs:
+    - model_linear.pkl
+  SIGMODE:
+    cmd: ipython src/SIGMODE.ipynb model_sigmode.pkl
+    deps:
+    - src/SIGMODE.ipynb
+    outs:
+    - model_sigmode.pkl
+  TANH:
+    cmd: ipython src/TANH.ipynb model_tanh.pkl
+    deps:
+    - src/TANH.ipynb
+    outs:
+    - model_tanh.pkl
+  1_Neural:
+    cmd: ipython src/1_Neural.ipynb data/Iris.csv model_neural.pkl
+    deps:
+    - data/Iris.csv
+    - src/1_Neural.ipynb
+    outs:
+    - model_neural.pkl

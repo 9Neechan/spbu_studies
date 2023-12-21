@@ -1,0 +1,34 @@
+schema: '2.0'
+stages:
+  LINEAR:
+    cmd: ipython src/LINEAR.ipynb
+    deps:
+    - path: src/LINEAR.ipynb
+      hash: md5
+      md5: f7c6565ffefb80fc70358c2dd6d0287f
+      size: 25035
+  SIGMODE:
+    cmd: ipython src/SIGMOID.ipynb
+    deps:
+    - path: src/SIGMOID.ipynb
+      hash: md5
+      md5: 4078194082fb068511b2c5dcfff17e51
+      size: 25015
+  TANH:
+    cmd: ipython src/TANH.ipynb
+    deps:
+    - path: src/TANH.ipynb
+      hash: md5
+      md5: 9f7ba80fc12184a7d7bd6eb7ebac3c20
+      size: 25013
+  1_Neural:
+    cmd: ipython src/1_Neural.ipynb data/Iris.csv
+    deps:
+    - path: data/Iris.csv
+      hash: md5
+      md5: 717820ef0af287ff346c5cabfb4c612c
+      size: 5107
+    - path: src/1_Neural.ipynb
+      hash: md5
+      md5: d14a77fbe18863507affd7366bfcfe8c
+      size: 446862

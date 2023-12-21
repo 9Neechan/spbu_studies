@@ -1,0 +1,31 @@
+stages:
+  1_Neural:
+    cmd: ipython src/1_Neural.ipynb data/Iris.csv 
+    deps:
+    - data/Iris.csv
+    - src/1_Neural.ipynb
+    metrics:
+    - scores.json:
+        cache: false
+    plots:
+    - prc.json:
+        cache: false
+    
+
+
+  LINEAR:
+    cmd: ipython src/LINEAR.ipynb 
+    deps:
+    - src/LINEAR.ipynb
+
+  SIGMODE:
+    cmd: ipython src/SIGMOID.ipynb 
+    deps:
+    - src/SIGMOID.ipynb
+
+  TANH:
+    cmd: ipython src/TANH.ipynb 
+    deps:
+    - src/TANH.ipynb
+
+
