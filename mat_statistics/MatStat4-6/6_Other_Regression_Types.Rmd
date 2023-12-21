@@ -1,0 +1,209 @@
+---
+title: "6_Other_Regression_Types"
+author: "MariaGladkaya"
+date: "2023-12-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+options(knitr.duplicate.label = "allow")
+
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+#      Dataset “blood.xlsx”
+## Считываем дата-сет
+
+```{r fig.width=12, fig.height=9, message=FALSE}
+library(readxl)
+blood <- read_excel("~/spbu_studies/mat_statistics/MatStat4-6/datasets/blood.xlsx")
+View(blood)
+```
+
+## Ридж регрессия
+
+### Постройте модель ридж регрессии для X1 как функции от X2 и  X3. Используйте функции cv.plot и bias.plot для нахождения параметра k. 
+
+```{r fig.width=12, fig.height=9, message=FALSE}
+library(MASS)
+library(lmridge)
+library(GGally)
+library(ggplot2)
+ggpairs(blood)
+```
+по графику видно, что у данных зависимость близка к линейной
+
+```{r fig.width=12, fig.height=9, message=FALSE}
+library(InformationValue)
+
+df_fidgemod <- lmridge(blood$X1~., blood, lambda=0.05)
+df_fidgemod
+```
+Коэф-ты модели
+
+#### изображаем хвосты в зависимости от лямбда
+```{r message=FALSE}
+blood_fidgemod <- lmridge(blood$X1~., data=blood, K=seq(0, 0.5, 0.02))
+plot(blood_fidgemod, type = "ridge")
+```
+Как будет изменять оценка параметра в зависимости от параметра лямбда
+
+В 0 совпадают с оценками метода наименьших квадратов
+
+Минимум в ошибках при К=0,12
+
+#### Проверьте мультиколлинеарность данных.
+
+```{r message=FALSE}
+plot(blood_fidgemod, type = "vif")
+```
+vif должен быть меньше 10. График показывает как vif меняется в зависимости от лямбда.
+
+Мультиколлинеарность данных не выявлена при текущих значения К.
+
+#### Смотрим как меняются коэф-ты AIC и BIC
+```{r message=FALSE}
+info.plot(blood_fidgemod)
+```
+Минимальное значение AIC там, где вертикальная черта
+
+```{r message=FALSE, fig.width=9, fig.height=6}
+cv.plot(blood_fidgemod)
+```
+
+```{r message=FALSE, fig.width=9, fig.height=6}
+bias.plot(blood_fidgemod)
+```
+
+
+#### Графики рекомендовали нам К=0,12 и К=0,06
+
+```{r message=FALSE, fig.width=9, fig.height=6}
+blood_fidgemod1 <- lmridge(blood$X1~., blood, K=0.12)
+summary(blood_fidgemod1)
+```
+
+```{r message=FALSE, fig.width=9, fig.height=6}
+blood_fidgemod2 <- lmridge(blood$X1~., blood, K=0.06)
+summary(blood_fidgemod2)
+```
+
+Вторая модель лучше по AIC и предсказательной способности
+
+- R2 хорошее значение
+- Ridge minimum MSE= 91.00171 at K= 0,06 - минимум функции достигается при этом значении лямбда и это минимизорованнное значние
+- P-value < 0.05 => ур. значимо
+
+```{r message=FALSE, fig.width=9, fig.height=6}
+vif(blood_fidgemod2)
+```
+Проблема мультиколлинеарности не обнаружена
+
+### Проведите сравнительной анализ полученной модели с моделью линейной регрессии (когда оценки найдены по МНК). 
+
+#### Линейная модель
+```{r message=FALSE, fig.width=9, fig.height=6}
+blood_lin <- lm(blood$X1~., data=blood)
+summary(blood_lin)
+```
+Adjusted R-squared, R-squared увеличился в линейной модели
+
+Значимость коэф-тов незначительно уменьшилась
+
+
+
+#       Dataset “Kuiper.xls”
+## Считываем дата-сет
+
+```{r fig.width=12, fig.height=9, message=FALSE}
+kuiper <- read_excel("~/spbu_studies/mat_statistics/MatStat4-6/datasets/kuiper_less.xls")
+View(kuiper)
+```
+
+## Квантильная регрессия (Медианная)
+Оценка метода наименьших модулей
+
+На сколько отклоняется наблюдаемое значение от значения предсказанного по модели линейной регрессии
+
+### Постройте квантильную регрессию для различных значений параметров «тау», Y = price – зависимая переменная, mileage, liter, cruise, sound, leather leather – независимые переменные). 
+
+```{r fig.width=12, fig.height=9, message=FALSE}
+library(quantreg)
+qreg1 <- rq(kuiper$Price~., tau=0.5, data = kuiper)
+summary(qreg1)
+```
+Доверительные интервалы
+
+```{r  fig.width=15, fig.height=9, message=FALSE}
+myqreg <- rq(kuiper$Price~., tau=1:9/10, data = kuiper)
+plot(myqreg)
+```
+точки - значения коэф-та при соотв значении переменной
+
+красная линия - сравнения с мотодом наим. квадратов
+
+```{r fig.width=15, fig.height=9, message=FALSE}
+plot(summary(myqreg))
+```
+Серая обл- доверительный интервал для коэф. квантильной регрессии
+
+Красная обл- доверительный интервал для оценки методом наим. квадратов
+
+#### Постороение линейной регрессии и сравнение с квантильной
+
+```{r message=FALSE, fig.width=12, fig.height=9}
+kuiper_lin <- lm(kuiper$Price~., data=kuiper)
+plot(kuiper$Price~., data = kuiper, pch=16)
+abline(qreg1, col="red", lty=2)
+abline(kuiper_lin, col="blue", lty=2)
+```
+Медианная регрессия более устойчива к выбросам, те выбросы не сильно меняют угол наклона
+
+```{r message=FALSE, fig.width=12, fig.height=9}
+summary(kuiper_lin)
+
+```
+
+
+#       Dataset “cigarettes.txt”
+## Считываем дата-сет
+
+```{r fig.width=12, fig.height=9, message=FALSE}
+cigar <- read_excel("~/spbu_studies/mat_statistics/MatStat4-6/datasets/cigarettes.xlsx")
+View(cigar)
+```
+
+## Нелинейная регрессия
+
+### Квадратичная модель
+
+```{r message=FALSE, fig.width=9, fig.height=6}
+quadratic <- lm(cigar$y~. + I(cigar$x1^2) + I(cigar$x2 ^2)+ I(cigar$x3 ^2), data = cigar)
+summary(quadratic)
+```
+
+### Кубическая модель
+
+```{r message=FALSE, fig.width=9, fig.height=6}
+cubic <- lm(cigar$y~ poly(cigar$x1, degree=3)+ poly(cigar$x2, degree=3) + poly(cigar$x3, degree=3), data = cigar)
+summary(cubic)
+```
+Уравнения записываюся с коэф-тами при соответствующей степени
+
+### Линейная модель
+```{r message=FALSE, fig.width=9, fig.height=6}
+cigar_lin <- lm(cigar$y~., data=cigar)
+summary(cigar_lin)
+```
+
+
+
+
+
+
+
+
+
+
+

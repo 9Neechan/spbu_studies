@@ -1,0 +1,292 @@
+---
+title: "5_Binary_regression"
+author: "MariaGladkaya"
+date: "2023-12-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Считываем дата-сет
+
+```{r data, fig.width=12, fig.height=9, message=FALSE}
+library(readxl)
+df <- read_excel("~/spbu_studies/mat_statistics/MatStat4-6/datasets/Doctor.xlsx")
+View(df)
+```
+
+#### В бинарной модели регрессии у может принимать ограниченное число значений. В бинарной - это 0 и 1.
+Оценка методом максимального правдоподобия для нахождения оценок
+
+Логит/пробит(норм. расп) модели
+
+## Построение логит модели
+### Построить описательную статистику с помощью функции summary. 
+Х1, Х2, Х3, Х5 - непрерывные. Х4 - категориальная
+```{r}
+summary(df)
+```
+Медиана = 0 => больше единиц, ассиметрия распределения
+
+```{r}
+sapply(df, sd)
+```
+Среднее отклонение
+
+### При необходимости создать категориальную переменную (функция factor).
+#### Таблица сопряженности признаков 
+```{r}
+xtabs(~y+x4, df)
+```
+
+x4 разбит на 3 категории
+```{r}
+df$x4 <- factor(df$x4)
+```
+
+### Построить базовую модель логистической регрессии с максимально возможным количеством предикторов с использованием функции glm.  
+
+### Протестировать значимость коэффициентов регрессии в отдельности. 
+
+```{r}
+mylogit <- glm(y~x1+x2+x3+x4+x5, df, family=binomial("logit"))
+summary(mylogit)
+```
+*Coefficients:* 
+
+- Estimate - оценки коэф-тов в ур-нии
+- Std. Error, t value - стандартная ошибка и значение статистики Т
+- Статистика Вальда (z-statistic)
+    
+    Н0: коэф-т равен 0 (не значим)
+      
+      принимаем => не значим
+      
+      отвергаем => значим (р < 0.05)
+      
+*AIC: 53.251* - Коэф. максимального правдоподобия (для оценки при минимизации этого коэф.)
+
+*Критерий максимального правдоподобия* - разница между откл. остатков для модели с предикторами и нулевой моделью
+
+- Null deviance: 75.934  on 57  degrees of freedom (нулевая модель)
+- Residual deviance: 39.251  on 51  degrees of freedom
+
+### Записать уравнение бинарной регрессии, используя оценки коэффициентов.
+
+Логарифмическая зависимость 
+
+**вx = -10.70095 + 0.45959 X1 + 0.81826 X2 - 0.37897 X3 - 0.03383 X5 - -2.14618/{X4=2} + 0.22639/{X4=3}**
+
+## Анализ базовой модели
+
+### Проверить значимость регрессии в целом по критерию Вальда и максимального правдоподобия. 
+
+*Критерий максимального правдоподобия*
+
+```{r}
+with(mylogit, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = FALSE))
+```
+H0: Все коэф-ты одновременно = 0
+
+Отвергаем, значит ур. является значимым
+
+
+*Критерий Вальда* - Terms - список коэф-тов, которые надо проверить на значимость
+
+```{r}
+library(aod)
+wald.test(b = coef(mylogit), Sigma = vcov(mylogit), Terms = 2:7)
+```
+
+Н0 о том, что коэф-ты незначимы отвергается
+
+### Построить доверительные интервалы для коэффициентов регрессии (функции  confint и confint.default). 
+
+```{r}
+confint(mylogit)
+```
+
+Доверительные интервалы построенные на стандартных ошибках
+```{r}
+confint.default(mylogit)
+```
+
+## Построение пробит модели
+### Провести сравнительный анализ логит и пробит моделей. 
+
+```{r}
+myprobit <- glm(y~x1+x2+x3+x4+x5, df, family=binomial("probit"))
+summary(myprobit)
+```
+*Coefficients:*  x2 стал более значим
+      
+*AIC*: **53.239** < 53.251 - модель немного улучшилась
+
+*Residual deviance:* **39.239** < 39.251
+
+## Анализ базовой модели
+
+### Проверить значимость регрессии в целом по критерию Вальда и максимального правдоподобия. 
+
+*Критерий максимального правдоподобия*
+
+```{r}
+with(myprobit, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = FALSE))
+```
+H0: Все коэф-ты одновременно = 0
+
+Отвергаем, значит ур. является значимым
+
+
+*Критерий Вальда* - Terms - список коэф-тов, которые надо проверить на значимость
+
+```{r}
+library(aod)
+wald.test(b = coef(myprobit), Sigma = vcov(myprobit), Terms = 2:7)
+```
+
+Н0 о том, что коэф-ты незначимы отвергается
+
+## Диагностика модели бинарной регрессии
+
+```{r}
+test.predicted.logit <- predict(mylogit, newdata = df, type = "response")
+test.predicted.logit
+```
+```{r}
+test.predicted.probit <- predict(myprobit, newdata = df, type = "response")
+test.predicted.probit
+```
+
+### Построить таблицу сопряженности с пороговой вероятностью 0.5 (функция  confusionMatrix). 
+
+TP (true positive) - правильно предсказанные положительные значения
+
+TN (true negative) - правильно предсказанные отрицательные значения
+
+```{r}
+library(InformationValue)
+confusionMatrix(df$y, test.predicted.logit, threshold = 0.5)
+```
+ок - не ок
+
+не ок - ок
+
+```{r}
+confusionMatrix(df$y, test.predicted.probit, threshold = 0.5)
+```
+```{r}
+library(InformationValue)
+confusionMatrix(df$y, test.predicted.logit, threshold = 0.45)
+```
+
+```{r}
+confusionMatrix(df$y, test.predicted.probit, threshold = 0.45)
+```
+```{r}
+library(InformationValue)
+confusionMatrix(df$y, test.predicted.logit, threshold = 0.55)
+```
+
+```{r}
+confusionMatrix(df$y, test.predicted.probit, threshold = 0.55)
+```
+
+```{r}
+library(InformationValue)
+confusionMatrix(df$y, test.predicted.logit, threshold = 0.60)
+```
+
+```{r}
+confusionMatrix(df$y, test.predicted.probit, threshold = 0.60)
+```
+
+#### оптимальное пороговое значение вероятности предсказания: 0.55
+
+### Посчитать специфичность и чувствительность модели (функции  sensitivity и specificity). 
+
+**чувствительность** - доля правильно предсказанных единиц среди всех предсказаных единиц
+
+```{r}
+sensitivity(df$y, test.predicted.logit, threshold = 0.5)
+sensitivity(df$y, test.predicted.logit, threshold = 0.55)
+sensitivity(df$y, test.predicted.logit, threshold = 0.6)
+```
+
+```{r}
+sensitivity(df$y, test.predicted.probit, threshold = 0.5)
+sensitivity(df$y, test.predicted.probit, threshold = 0.55)
+sensitivity(df$y, test.predicted.probit, threshold = 0.6)
+```
+
+**специфичность** - доля правильно предсказанных нулей среди предсказанных нулей
+
+```{r}
+specificity(df$y, test.predicted.logit, threshold = 0.4)
+specificity(df$y, test.predicted.logit, threshold = 0.55)
+specificity(df$y, test.predicted.logit, threshold = 0.7)
+```
+
+```{r}
+specificity(df$y, test.predicted.probit, threshold = 0.4)
+specificity(df$y, test.predicted.probit, threshold = 0.55)
+specificity(df$y, test.predicted.probit, threshold = 0.7)
+```
+
+
+### Найти оптимальное пороговое значение вероятности предсказания. Построить таблицу сопряженности для этой вероятности, посчитать специфичность и чувствительность модели (функция  optimalCutoff). 
+
+```{r}
+optcutlogit <- optimalCutoff(df$y, test.predicted.logit)[1]
+optcutlogit
+```
+
+```{r}
+confusionMatrix(df$y, test.predicted.logit, threshold = 0.5293058)
+```
+```{r}
+optcutprobit <- optimalCutoff(df$y, test.predicted.probit)[1]
+optcutprobit
+```
+
+```{r}
+confusionMatrix(df$y, test.predicted.probit, threshold = 0.5399782)
+```
+**Изменений не произошло**
+
+
+### Построить ROC кривую, интерпретировать результаты (функция  plotROC).  
+
+ROC суммирует производительность модели, оценивая компромисс между частотой истинных положит. рез-ов и частотой ложных положит. рез-ов (площадь подграфика)
+
+Чем больше площадь подграфика, тем лучше, тем больше наблюдений были правильно предсказаны
+
+```{r}
+plotROC(df$y, test.predicted.logit)
+```
+
+```{r}
+plotROC(df$y, test.predicted.probit)
+```
+
+
+### Попробовать улучшить логит или пробит модель с использованием коэффициента AIC (функция  stepAIC). 
+
+```{r}
+library(MASS)
+stepAIC(mylogit)
+```
+```{r}
+library(MASS)
+stepAIC(myprobit)
+```
+
+
+
+
+
+
+
+
