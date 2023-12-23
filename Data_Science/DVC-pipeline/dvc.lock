@@ -5,22 +5,22 @@ stages:
     deps:
     - path: src/LINEAR.ipynb
       hash: md5
-      md5: f7c6565ffefb80fc70358c2dd6d0287f
-      size: 25035
+      md5: 413bbfbc5204a01c959cbd70938fb3a8
+      size: 24377
   SIGMODE:
     cmd: ipython src/SIGMOID.ipynb
     deps:
     - path: src/SIGMOID.ipynb
       hash: md5
-      md5: 4078194082fb068511b2c5dcfff17e51
-      size: 25015
+      md5: 1bc04d39661daca8859947c1ace8edfb
+      size: 26205
   TANH:
     cmd: ipython src/TANH.ipynb
     deps:
     - path: src/TANH.ipynb
       hash: md5
-      md5: 9f7ba80fc12184a7d7bd6eb7ebac3c20
-      size: 25013
+      md5: 4375bb9ae3fda25f8868037aa67528a7
+      size: 38630
   1_Neural:
     cmd: ipython src/1_Neural.ipynb data/Iris.csv
     deps:
