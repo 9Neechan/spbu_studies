@@ -7,3 +7,5 @@ env/
 3_integral
 4_maxmin_aij
 5_maxmin_for_special_type
+.ipynb_checkpoints
+Data_Science/CNN_lego_classification/datasets/
