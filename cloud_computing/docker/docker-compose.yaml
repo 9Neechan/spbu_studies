@@ -1,0 +1,33 @@
+services:
+    app:
+        image: neechan9/cloud-computing-task:latest
+        restart: always
+        environment:
+            - DATABASE_HOST=postgres
+            - DATABASE_USER=postgres
+            - DATABASE_PASSWORD=postgres
+            - DATABASE_NAME=CloudComputingTask
+            - DATABASE_URL=postgresql+psycopg://postgres:postgres@postgres:5432/CloudComputingTask
+        depends_on:
+            - postgres
+    
+    postgres:
+        image: postgres:latest
+        restart: always
+        ports:
+            - "5432:5432"
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=CloudComputingTask
+        volumes:
+            - ./postgres_data:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+            interval: 1s
+            timeout: 5s
+            retries: 5
+            start_period: 10s
+
+volumes:
+  pgdata:
